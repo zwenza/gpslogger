@@ -1,118 +1,95 @@
 package at.joech.gpslogger;
 
-import android.os.AsyncTask;
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import javax.xml.datatype.Duration;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LocationListener {
     public static final String TAG = MainActivity.class.getSimpleName();
+    public static final int PERMISSION_CODE = 1;
 
-    private List<Position> positions;
-    private ArrayAdapter<Position> gpsAdapter;
+    private List<Location> locations;
+    private ArrayAdapter<Location> gpsAdapter;
+    private LocationManager locationManager;
     private Button toogleButton;
-    private Handler uiHandler;
     private boolean running;
-    private GpsTask gpsTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        uiHandler = new Handler();
-        positions = new ArrayList<>();
-        gpsAdapter = new ArrayAdapter<>(this, R.layout.gps_list_item, R.id.gpsItem, positions);
+        locations = new ArrayList<>();
+        gpsAdapter = new ArrayAdapter<>(this, R.layout.gps_list_item, R.id.gpsItem, locations);
         toogleButton = (Button) findViewById(R.id.btnStartTracking);
 
         ListView gpsView = (ListView) findViewById(R.id.gpsView);
         gpsView.setAdapter(gpsAdapter);
+
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "no permissions to get gps-data!");
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_CODE);
+            return;
+        }
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
     }
 
-    public void toogleTracking(View view){
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+        }
+    }
+
+    public void toogleTracking(View view) {
         Log.i(TAG, "started tracking!");
 
-        if(!running){
-            gpsTask = new GpsTask();
-            gpsTask.execute("");
+        if (!running) {
             running = true;
             toogleButton.setText("stop tracking");
         } else {
-            gpsTask.cancel(true);
             running = false;
             toogleButton.setText("start tracking");
         }
     }
 
-    private class GpsTask extends AsyncTask<String, Integer, String> {
-        @Override
-        protected String doInBackground(String... params) {
-            new Timer().scheduleAtFixedRate(
-                    new TimerTask() {
-                        @Override
-                        public void run() {
-                            if(isCancelled())
-                                this.cancel();
-
-                            //TODO add user coordinates here
-                            positions.add(new Position(1.0f, 1.0f));
-
-                            uiHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    gpsAdapter.notifyDataSetChanged();
-                                }
-                            });
-                        }
-                    },
-            0, 1000);   //TODO make intervall adjustable
-            return null;
-        }
+    @Override
+    public void onLocationChanged(Location location) {
+        Log.i(TAG, "location changed!");
+        locations.add(location);
+        gpsAdapter.notifyDataSetChanged();
     }
 
-    private class Position {
-        private float lat;
-        private float lon;
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
 
-        public Position(float lat, float lon) {
-            this.lat = lat;
-            this.lon = lon;
-        }
+    }
 
-        public float getLat() {
-            return lat;
-        }
+    @Override
+    public void onProviderEnabled(String provider) {
 
-        public void setLat(float lat) {
-            this.lat = lat;
-        }
+    }
 
-        public float getLon() {
-            return lon;
-        }
+    @Override
+    public void onProviderDisabled(String provider) {
 
-        public void setLon(float lon) {
-            this.lon = lon;
-        }
-
-        @Override
-        public String toString() {
-            return lat + " " + lon;
-        }
     }
 }
