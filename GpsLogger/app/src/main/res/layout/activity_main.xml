@@ -35,7 +35,7 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:onClick="startTracking" />
+        android:onClick="toogleTracking" />
 
     <EditText
         android:layout_width="200px"
@@ -47,13 +47,20 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
-    <ListView
+    <TextView  android:id="@+id/gpsItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/gpsView"
-        android:layout_below="@+id/textView"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_above="@+id/btnStartTracking" />
+        android:text="@+id/label"
+        android:textSize="20px" />
+
+        <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/gpsView"
+            android:layout_below="@+id/textView"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_above="@+id/btnStartTracking"
+            tools:listitem="@android:layout/simple_list_item_1" />
 
 </RelativeLayout>

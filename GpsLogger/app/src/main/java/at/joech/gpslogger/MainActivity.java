@@ -1,12 +1,14 @@
 package at.joech.gpslogger;
 
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -22,28 +24,39 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = MainActivity.class.getSimpleName();
 
     private List<Position> positions;
+    private ArrayAdapter<Position> gpsAdapter;
+    private Button toogleButton;
+    private Handler uiHandler;
+    private boolean running;
+    private GpsTask gpsTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        uiHandler = new Handler();
         positions = new ArrayList<>();
+        gpsAdapter = new ArrayAdapter<>(this, R.layout.gps_list_item, R.id.gpsItem, positions);
+        toogleButton = (Button) findViewById(R.id.btnStartTracking);
 
         ListView gpsView = (ListView) findViewById(R.id.gpsView);
-        gpsView.setAdapter(new ArrayAdapter<>(this, R.layout.activity_main, positions));
-
-        gpsView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getApplicationContext(), "toast!", Toast.LENGTH_SHORT).show();
-            }
-        });
+        gpsView.setAdapter(gpsAdapter);
     }
 
-    public void startTracking(View view){
+    public void toogleTracking(View view){
         Log.i(TAG, "started tracking!");
-        new GpsTask().execute("");
+
+        if(!running){
+            gpsTask = new GpsTask();
+            gpsTask.execute("");
+            running = true;
+            toogleButton.setText("stop tracking");
+        } else {
+            gpsTask.cancel(true);
+            running = false;
+            toogleButton.setText("start tracking");
+        }
     }
 
     private class GpsTask extends AsyncTask<String, Integer, String> {
@@ -53,11 +66,21 @@ public class MainActivity extends AppCompatActivity {
                     new TimerTask() {
                         @Override
                         public void run() {
-                            Log.i(TAG, "new position!");
+                            if(isCancelled())
+                                this.cancel();
+
+                            //TODO add user coordinates here
                             positions.add(new Position(1.0f, 1.0f));
+
+                            uiHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    gpsAdapter.notifyDataSetChanged();
+                                }
+                            });
                         }
                     },
-            0, 1000);
+            0, 1000);   //TODO make intervall adjustable
             return null;
         }
     }
@@ -69,9 +92,6 @@ public class MainActivity extends AppCompatActivity {
         public Position(float lat, float lon) {
             this.lat = lat;
             this.lon = lon;
-        }
-
-        public Position() {
         }
 
         public float getLat() {
@@ -88,6 +108,11 @@ public class MainActivity extends AppCompatActivity {
 
         public void setLon(float lon) {
             this.lon = lon;
+        }
+
+        @Override
+        public String toString() {
+            return lat + " " + lon;
         }
     }
 }
