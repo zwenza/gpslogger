@@ -35,39 +35,27 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         setContentView(R.layout.activity_main);
 
         locations = new ArrayList<>();
-        gpsAdapter = new ArrayAdapter<>(this, R.layout.gps_list_item, R.id.gpsItem, locations);
         toogleButton = (Button) findViewById(R.id.btnStartTracking);
+        gpsAdapter = new GpsAdapter(this, R.layout.gps_list_item, R.id.gpsItem, locations);
 
         ListView gpsView = (ListView) findViewById(R.id.gpsView);
         gpsView.setAdapter(gpsAdapter);
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.e(TAG, "no permissions to get gps-data!");
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_CODE);
-            return;
-        }
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-        }
     }
 
     public void toogleTracking(View view) {
-        Log.i(TAG, "started tracking!");
-
         if (!running) {
             running = true;
-            toogleButton.setText("stop tracking");
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            toogleButton.setText("Stop Tracking");
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, this);
         } else {
             running = false;
-            toogleButton.setText("start tracking");
+            toogleButton.setText("Start Tracking");
+            locationManager.removeUpdates(this);
         }
     }
 
@@ -80,16 +68,18 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-
+        Log.i(TAG, "status changed!");
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-
+        Log.i(TAG, "provider enabled!");
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-
+        Log.i(TAG, "provider disabled!");
+        Log.e(TAG, "no permissions to get gps-data!");
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_CODE);
     }
 }
