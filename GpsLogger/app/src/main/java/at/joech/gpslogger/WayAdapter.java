@@ -13,13 +13,13 @@ import java.util.List;
 /**
  * Created by david on 17.09.16.
  */
-public class GpsAdapter extends ArrayAdapter<Position> {
+public class WayAdapter extends ArrayAdapter<Way>{
 
-    private List<Position> positions;
+    private List<Way> ways;
 
-    public GpsAdapter(Context context, int resource, int textViewResourceId, List<Position> objects) {
+    public WayAdapter(Context context, int resource, int textViewResourceId, List<Way> objects) {
         super(context, resource, textViewResourceId, objects);
-        positions = objects;
+        ways = objects;
     }
 
     @Override
@@ -30,11 +30,11 @@ public class GpsAdapter extends ArrayAdapter<Position> {
             v = vi.inflate(R.layout.gps_list_item, null);
         }
 
-        Position p = positions.get(position);
-        if (p != null) {
+        Way w = ways.get(position);
+        if (w != null) {
             TextView gpsItemView = (TextView) v.findViewById(R.id.gpsItem);
             if (gpsItemView != null) {
-                gpsItemView.setText("Position: " + p.getLat() + ":" + p.getLon());
+                gpsItemView.setText(w.getTitle());
             }
         }
         return v;
