@@ -1,4 +1,4 @@
-package at.joech.gpslogger;
+package at.joech.gpslogger.models;
 
 import java.io.Serializable;
 

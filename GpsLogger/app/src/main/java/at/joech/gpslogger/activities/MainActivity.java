@@ -1,4 +1,4 @@
-package at.joech.gpslogger;
+package at.joech.gpslogger.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,6 +14,10 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import at.joech.gpslogger.R;
+import at.joech.gpslogger.adapters.WayAdapter;
+import at.joech.gpslogger.models.Way;
+
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = MainActivity.class.getSimpleName();
 
@@ -26,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         recordedWays = new ArrayList<>();
-        wayAdapter = new WayAdapter(this, R.layout.gps_list_item, R.id.gpsItem, recordedWays);
+        wayAdapter = new WayAdapter(this, R.layout.way_list_item, R.id.wayItemDescription, recordedWays);
 
         ListView waysView = (ListView) findViewById(R.id.waysView);
         waysView.setAdapter(wayAdapter);

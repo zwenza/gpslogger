@@ -1,7 +1,8 @@
-package at.joech.gpslogger;
+package at.joech.gpslogger.activities;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -21,6 +22,11 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import at.joech.gpslogger.adapters.GpsAdapter;
+import at.joech.gpslogger.R;
+import at.joech.gpslogger.models.Position;
+import at.joech.gpslogger.models.Way;
 
 public class WayActivity extends AppCompatActivity implements LocationListener {
 
@@ -58,17 +64,22 @@ public class WayActivity extends AppCompatActivity implements LocationListener {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
-            toogleButton.setText("Beende Tracking");
+            toogleButton.setText("Beende Wegaufzeichnung");
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, this);
-            Toast.makeText(getApplicationContext(), "Weg-Aufzeichnung gestartet!", Toast.LENGTH_LONG);
+            Toast.makeText(getApplicationContext(), "Weg-Aufzeichnung gestartet!", Toast.LENGTH_LONG).show();
         } else {
             running = false;
-            toogleButton.setText("Start Tracking");
+            toogleButton.setText("Starte Wegaufzeichnung");
             locationManager.removeUpdates(this);
             saveData();
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
         }
     }
 
+    /**
+     * saves the current recorded way
+     */
     private void saveData() {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-HH-mm");
 

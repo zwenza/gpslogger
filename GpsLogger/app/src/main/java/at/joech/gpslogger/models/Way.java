@@ -1,6 +1,4 @@
-package at.joech.gpslogger;
-
-import android.location.Location;
+package at.joech.gpslogger.models;
 
 import java.io.Serializable;
 import java.util.ArrayList;
